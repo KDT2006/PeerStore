@@ -1,9 +1,16 @@
 package main
 
 import (
-	"fmt"
+	"log"
+
+	"github.com/KDT2006/foreverstore-go/p2p"
 )
 
 func main() {
-	fmt.Println("Hello World!")
+	tr := p2p.NewTCPTransport(":4000")
+	if err := tr.ListenAndAccept(); err != nil {
+		log.Fatal(err)
+	}
+
+	select {}
 }
