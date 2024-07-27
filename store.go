@@ -109,13 +109,6 @@ func (s *Store) ReadStream(key string) (int64, io.Reader, error) {
 	if err != nil {
 		return 0, nil, err
 	}
-	// defer file.Close()
-
-	// buf := new(bytes.Buffer)
-	// _, err = io.Copy(buf, file)
-	// if err != nil {
-	// 	return 0, nil, err
-	// }
 
 	return fi.Size(), file, err
 }
