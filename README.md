@@ -1,7 +1,7 @@
-# foreverstore-go
+# PeerStore
 
 ## Description
-**foreverstore-go** is a fully distributed storage system built in Go, leveraging a custom peer-to-peer (P2P) library implemented over TCP. This project facilitates secure and efficient storage, retrieval, and deletion(TODO) of files within a decentralized network, with built-in encryption for data protection.
+**PeerStore** is a fully distributed storage system built in Go, leveraging a custom peer-to-peer (P2P) library implemented over TCP. This project facilitates secure and efficient storage, retrieval, and deletion(TODO) of files within a decentralized network, with built-in encryption for data protection.
 
 ## Features
 - **Distributed Storage**: Files are stored across multiple nodes in a peer-to-peer network, ensuring redundancy and availability.
