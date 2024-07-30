@@ -1,4 +1,4 @@
-module github.com/KDT2006/foreverstore-go
+module github.com/KDT2006/PeerStore
 
 go 1.22.5
 

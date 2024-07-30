@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/KDT2006/foreverstore-go/p2p"
+	"github.com/KDT2006/PeerStore/p2p"
 )
 
 type FileServerOpts struct {
