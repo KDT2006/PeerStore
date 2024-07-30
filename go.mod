@@ -1,6 +1,6 @@
 module github.com/KDT2006/foreverstore-go
 
-go 1.21.11
+go 1.22.5
 
 require github.com/stretchr/testify v1.9.0
 

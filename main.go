@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"log"
@@ -18,6 +19,7 @@ func makeServer(listenAddr string, nodes ...string) *FileServer {
 	tcpTransport := p2p.NewTCPTransport(tcpTransportOpts)
 
 	fileServerOpts := FileServerOpts{
+		EncKey:            newEncryptionKey(),
 		StorageRoot:       listenAddr + "_network",
 		PathTransformFunc: CASPathTransformFunc,
 		Transport:         tcpTransport,
@@ -34,6 +36,7 @@ func makeServer(listenAddr string, nodes ...string) *FileServer {
 func main() {
 	s1 := makeServer(":3000")
 	s2 := makeServer(":4000", ":3000")
+	// s3 := makeServer(":5000", ":4000", ":3000")
 
 	go func() {
 		log.Fatal(s1.Start())
@@ -44,11 +47,20 @@ func main() {
 	go s2.Start()
 	time.Sleep(time.Second)
 
-	// data := bytes.NewReader([]byte("my big data file!"))
-	// s2.Store("coolPic.jpg", data)
-	// time.Sleep(time.Millisecond * 5)
+	// go s3.Start()
+	time.Sleep(time.Second)
 
-	r, err := s2.Get("coolPic.jpg")
+	// for i := 0; i < 20; i++ {
+	key := "picture_1.jpg"
+	data := bytes.NewReader([]byte("This is a big file!"))
+	s2.Store(key, data)
+	time.Sleep(time.Millisecond * 5)
+
+	if err := s2.store.Delete(key); err != nil {
+		log.Fatal(err)
+	}
+
+	r, err := s2.Get(key)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,4 +71,5 @@ func main() {
 	}
 
 	fmt.Println(string(b))
+	// }
 }
