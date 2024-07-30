@@ -56,7 +56,7 @@ func main() {
 	s2.Store(key, data)
 	time.Sleep(time.Millisecond * 5)
 
-	if err := s2.store.Delete(key); err != nil {
+	if err := s2.store.Delete(s2.ID, key); err != nil {
 		log.Fatal(err)
 	}
 

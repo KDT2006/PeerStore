@@ -28,29 +28,31 @@ func TestDelete(t *testing.T) {
 	s := NewStore(opts)
 	key := "specialpics"
 	data := []byte("some image")
+	id := generateID()
 
-	if _, err := s.writeStream(key, bytes.NewReader(data)); err != nil {
+	if _, err := s.writeStream(id, key, bytes.NewReader(data)); err != nil {
 		t.Error(err)
 	}
 
-	if err := s.Delete(key); err != nil {
+	if err := s.Delete(id, key); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestStore(t *testing.T) {
-	for i := 0; i < 50; i++ {
-		s := newStore()
-		defer teardown(t, s)
+	s := newStore()
+	id := generateID()
+	defer teardown(t, s)
 
+	for i := 0; i < 50; i++ {
 		key := fmt.Sprintf("specialpics_%d", i)
 		data := []byte("some image")
 
-		if _, err := s.writeStream(key, bytes.NewReader(data)); err != nil {
+		if _, err := s.writeStream(id, key, bytes.NewReader(data)); err != nil {
 			t.Error(err)
 		}
 
-		_, r, err := s.ReadStream(key)
+		_, r, err := s.ReadStream(id, key)
 		if err != nil {
 			t.Error(err)
 		}
@@ -64,7 +66,7 @@ func TestStore(t *testing.T) {
 			t.Errorf("want %s, have %s", data, b)
 		}
 
-		if err := s.Delete(key); err != nil {
+		if err := s.Delete(id, key); err != nil {
 			t.Error(err)
 		}
 	}

@@ -4,8 +4,16 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha1"
+	"encoding/hex"
 	"io"
 )
+
+func generateID() string {
+	buf := make([]byte, 32)
+	io.ReadFull(rand.Reader, buf)
+	return hex.EncodeToString(buf)
+}
 
 func newEncryptionKey() []byte {
 	keyBuf := make([]byte, 32)
@@ -13,22 +21,14 @@ func newEncryptionKey() []byte {
 	return keyBuf
 }
 
-func copyDecrypt(key []byte, src io.Reader, dst io.Writer) (int, error) {
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return 0, err
-	}
+func hashKey(key string) string {
+	hash := sha1.Sum([]byte(key))
+	return hex.EncodeToString(hash[:])
+}
 
-	// Read the IV from the given io.Reader which in our case should be
-	// the block.BlockSize() bytes we read
-	iv := make([]byte, block.BlockSize())
-	if _, err := src.Read(iv); err != nil {
-		return 0, err
-	}
-
+func copyStream(stream cipher.Stream, BlockSize int, src io.Reader, dst io.Writer) (int, error) {
 	buf := make([]byte, 32*1024)
-	stream := cipher.NewCTR(block, iv)
-	nw := block.BlockSize()
+	nw := BlockSize
 
 	for {
 		n, err := src.Read(buf)
@@ -53,6 +53,23 @@ func copyDecrypt(key []byte, src io.Reader, dst io.Writer) (int, error) {
 	return nw, nil
 }
 
+func copyDecrypt(key []byte, src io.Reader, dst io.Writer) (int, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return 0, err
+	}
+
+	// Read the IV from the given io.Reader which in our case should be
+	// the block.BlockSize() bytes we read
+	iv := make([]byte, block.BlockSize())
+	if _, err := src.Read(iv); err != nil {
+		return 0, err
+	}
+
+	stream := cipher.NewCTR(block, iv)
+	return copyStream(stream, block.BlockSize(), src, dst)
+}
+
 func copyEncrypt(key []byte, src io.Reader, dst io.Writer) (int, error) {
 	// Create a new AES cipher block using the provided key
 	block, err := aes.NewCipher(key)
@@ -71,33 +88,7 @@ func copyEncrypt(key []byte, src io.Reader, dst io.Writer) (int, error) {
 		return 0, err
 	}
 
-	buf := make([]byte, 32*1024)
 	// Create a new stream cipher using AES in CTR mode with the given block and IV
 	stream := cipher.NewCTR(block, iv)
-	nw := block.BlockSize()
-
-	for {
-		// Read data from the source into the buffer
-		n, err := src.Read(buf)
-		if n > 0 {
-			// Encrypt the data in the buffer using the stream cipher
-			stream.XORKeyStream(buf, buf[:n])
-			// Write the encrypted data to the destination
-			size, err := dst.Write(buf[:n])
-			if err != nil {
-				return 0, err
-			}
-			nw += size
-		}
-
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			return 0, err
-		}
-	}
-
-	return nw, nil
+	return copyStream(stream, block.BlockSize(), src, dst)
 }
